@@ -14,14 +14,13 @@ from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecMonitor
 
 from catanatron.models.player import Color, RandomPlayer
 from catanatron.players.weighted_random import WeightedRandomPlayer
 import catanatron.gym
 
 # 1. Action Masking Function
-# Catan has a large action space (e.g., 328 actions), but only a few are valid at any step.
-# Action masking prevents the RL agent from attempting invalid actions, which speeds up training.
 def mask_fn(env: gym.Env) -> np.ndarray:
     """Retrieves valid action mask from the unwrapped environment."""
     valid_actions = env.unwrapped.get_valid_actions()
@@ -39,26 +38,24 @@ def make_env(opponent_player):
             "map_type": "BASE",
             "vps_to_win": 10,
             "enemies": [opponent_player],
-            "representation": "vector",  # 'vector' is a flat 1D array of features
+            "representation": "vector", 
         }
     )
-    # Wrap environment to apply action masking
     env = ActionMasker(env, mask_fn)
     return env
 
 def main():
-    # Create directory for saving models and logs
+    #1. Create directory for saving models and logs
     models_dir = "sandbox/bots/rl/models"
     log_dir = "sandbox/bots/rl/logs"
     os.makedirs(models_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
 
     # 2. Configure the Opponent
-    # It's best to start training against a Random or WeightedRandom player,
-    # then later progress to training against Heuristic bots (e.g., SmartBot).
     opponent = WeightedRandomPlayer(Color.RED)
     
     # 3. Instantiate Environments
+    num_cpu = 8
     train_env = make_env(opponent)
     train_env = Monitor(train_env, log_dir) # Wrap with Monitor to track episodic stats (rewards, lengths)
 
