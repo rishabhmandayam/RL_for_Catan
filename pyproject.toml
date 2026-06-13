@@ -16,7 +16,14 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-dependencies = ["networkx", "click", "rich"]
+dependencies = [
+    "networkx",
+    "click",
+    "rich",
+    "stable-baselines3>=2.8.0",
+    "sb3-contrib>=2.8.0",
+    "wandb>=0.27.2",
+]
 
 [project.optional-dependencies]
 gym = ["gymnasium<=0.29.1", "numpy", "pandas", "fastparquet", "pygame"]

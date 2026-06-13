@@ -142,3 +142,10 @@ dmypy.json
 
 # Sandbox results
 sandbox/results/
+
+# Sandbox RL Models and Logs
+sandbox/bots/rl/models/
+sandbox/bots/rl/logs/
+
+# Weights & Biases logs
+wandb/
