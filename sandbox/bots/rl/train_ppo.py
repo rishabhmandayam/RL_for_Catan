@@ -32,17 +32,19 @@ def make_env(opponent_player):
     """Helper to instantiate and wrap the Catan env."""
     # We configure a 1v1 heads-up game. 
     # The RL agent will play as Color.BLUE, and the opponent plays as another color.
-    env = gym.make(
-        "catanatron/Catanatron-v0",
-        config={
-            "map_type": "BASE",
-            "vps_to_win": 10,
-            "enemies": [opponent_player],
-            "representation": "vector", 
-        }
-    )
-    env = ActionMasker(env, mask_fn)
-    return env
+    def _init() -> gym.Env:
+        env = gym.make(
+            "catanatron/Catanatron-v0",
+            config={
+                "map_type": "BASE",
+                "vps_to_win": 10,
+                "enemies": [opponent_player],
+                "representation": "vector", 
+            }
+        )
+        env = ActionMasker(env, mask_fn)
+        return env
+    return _init
 
 def main():
     #1. Create directory for saving models and logs
@@ -56,11 +58,13 @@ def main():
     
     # 3. Instantiate Environments
     num_cpu = 8
-    train_env = make_env(opponent)
-    train_env = Monitor(train_env, log_dir) # Wrap with Monitor to track episodic stats (rewards, lengths)
+    env_fns = [make_env(opponent) for _ in range(num_cpu)]
 
-    eval_env = make_env(opponent)
-    eval_env = Monitor(eval_env, os.path.join(log_dir, "eval"))
+    train_env = SubprocVecEnv(env_fns)
+    train_env = VecMonitor(train_env, log_dir)
+
+    eval_env = DummyVecEnv([make_env(opponent)])
+    eval_env = VecMonitor(eval_env, os.path.join(log_dir, "eval"))
 
     # 4. Instantiate the Maskable PPO model
     # We use MaskableActorCriticPolicy which supports action masks.
@@ -69,14 +73,14 @@ def main():
         train_env,
         learning_rate=3e-4,
         n_steps=2048,
-        batch_size=64,
+        batch_size=256,
         n_epochs=10,
         gamma=0.99,
         gae_lambda=0.95,
         clip_range=0.2,
         ent_coef=0.01,         # Entropy coefficient encourages exploration
         verbose=1,
-        tensorboard_log=log_dir
+        tensorboard_log=log_dir,
     )
 
     # 5. Callbacks
@@ -98,11 +102,12 @@ def main():
     )
 
     # 6. Train the Agent
-    total_timesteps = 100_000
-    print(f"Starting training for {total_timesteps} timesteps against {opponent.__class__.__name__}...")
+    total_timesteps = 1_000_000
+    print(f"Starting {num_cpu}-core parallel training for {total_timesteps} timesteps...")
     model.learn(
         total_timesteps=total_timesteps,
-        callback=[eval_callback, checkpoint_callback]
+        callback=[eval_callback, checkpoint_callback],
+        progress_bar=True
     )
 
     # Save final model
