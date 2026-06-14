@@ -134,7 +134,6 @@ def main():
     model.learn(
         total_timesteps=config["total_timesteps"],
         callback=[
-            eval_callback, 
             checkpoint_callback, 
             catan_metrics_callback
         ],

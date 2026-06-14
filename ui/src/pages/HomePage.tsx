@@ -28,6 +28,7 @@ const PLAYER_ARCHETYPES: Array<{
   { value: "RANDOM", label: "Random" },
   { value: "CATANATRON", label: "Catanatron" },
   { value: "WEIGHTED_RANDOM", label: "Weighted Random" },
+  { value: "RL", label: "RL Bot (Stable Baselines)" },
 ];
 
 const MAP_TEMPLATES: MapTemplate[] = ["BASE", "MINI", "TOURNAMENT"];

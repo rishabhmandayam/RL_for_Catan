@@ -7,7 +7,8 @@ export type PlayerArchetype =
   | "HUMAN"
   | "RANDOM"
   | "CATANATRON"
-  | "WEIGHTED_RANDOM";
+  | "WEIGHTED_RANDOM"
+  | "RL";
 export type MapTemplate = "BASE" | "MINI" | "TOURNAMENT";
 export type StateIndex = number | `${number}` | "latest";
 

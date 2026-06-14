@@ -27,6 +27,25 @@ def player_factory(player_key):
         return RandomPlayer(player_key[1])
     elif player_key[0] == "HUMAN":
         return ValueFunctionPlayer(player_key[1], is_bot=False)
+    elif player_key[0] == "RL":
+        import sys
+        import os
+        root_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../../")
+        )
+        if root_dir not in sys.path:
+            sys.path.append(root_dir)
+        from sandbox.bots.rl.sb3_bot import SB3Player
+        model_path = os.path.join(
+            root_dir,
+            "sandbox/bots/rl/models/best_model/best_model.zip"
+        )
+        if not os.path.exists(model_path):
+            model_path = os.path.join(
+                root_dir,
+                "sandbox/bots/rl/models/ppo_catan_final.zip"
+            )
+        return SB3Player(player_key[1], model_path)
     else:
         raise ValueError("Invalid player key")
 
