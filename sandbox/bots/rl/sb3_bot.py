@@ -27,7 +27,8 @@ class SB3Player(Player):
     def _init_spaces(self, game):
         # Lazy initialization based on the game's actual map and players
         if self.map_type is None:
-            self.map_type = game.state.board.map.map_type
+            num_land_tiles = len(game.state.board.map.land_tiles)
+            self.map_type = "MINI" if num_land_tiles == 7 else "BASE"
             
             # Catanatron's Gym Env always puts the 'ego' player first
             enemy_colors = [c for c in game.state.colors if c != self.color]

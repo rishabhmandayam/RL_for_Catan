@@ -59,6 +59,9 @@ def post_game_endpoint():
     if not isinstance(player_keys, list) or not 2 <= len(player_keys) <= 4:
         abort(400, description="'players' must be a list with 2 to 4 entries")
 
+    if "RL" in player_keys and len(player_keys) != 2:
+        abort(400, description="The RL trained bot only supports 2-player games.")
+
     map_template = request.json.get("map_template", "BASE")
     if map_template not in VALID_MAP_TEMPLATES:
         abort(

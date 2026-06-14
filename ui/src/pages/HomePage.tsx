@@ -47,6 +47,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const humanCount = players.filter((player) => player === "HUMAN").length;
   const hasTooManyHumans = humanCount > 1;
+  const rlCount = players.filter((player) => player === "RL").length;
+  const hasInvalidRLPlayerCount = rlCount > 0 && players.length !== 2;
 
   const handlePlayerChange = (index: number, value: PlayerArchetype) => {
     if (
@@ -79,7 +81,7 @@ export default function HomePage() {
   };
 
   const handleCreateGame = async () => {
-    if (hasTooManyHumans) {
+    if (hasTooManyHumans || hasInvalidRLPlayerCount) {
       return;
     }
 
@@ -198,6 +200,11 @@ export default function HomePage() {
                   Only one Human player is allowed.
                 </Alert>
               )}
+              {hasInvalidRLPlayerCount && (
+                <Alert severity="error" className="players-alert">
+                  The RL Bot only supports 2-player games.
+                </Alert>
+              )}
               <div className="players-list">
                 {players.map((player, index) => (
                   <div className="player-row" key={`${player}-${index}`}>
@@ -260,7 +267,7 @@ export default function HomePage() {
               variant="contained"
               color="primary"
               className="start-btn"
-              disabled={hasTooManyHumans}
+              disabled={hasTooManyHumans || hasInvalidRLPlayerCount}
               onClick={handleCreateGame}
             >
               Start
